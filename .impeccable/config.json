@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "impact",
+        "createdAt": "2026-11-11T21:11:29.816Z",
+        "reason": "agente principal: los 5 hallazgos son de bocetos descartados en .impeccable/mocks/decision/ (no se publican); el sitio usa Anton, no Impact"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "bahnschrift",
+        "createdAt": "2026-11-11T21:11:30.090Z",
+        "reason": "agente principal: bocetos descartados en .impeccable/mocks/decision/ usan Bahnschrift como sustituto de la fuente del boceto; el sitio usa Barlow, declarada en DESIGN.md"
+      }
+    ]
+  }
+}

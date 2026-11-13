@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-11T00:00:00.000Z",
+  "title": "Design System: Benjamin Heredia, Colector de planta",
+  "extensions": {
+    "colorMeta": {
+      "wall": { "role": "neutral", "displayName": "Concreto Claro", "canonical": "#d7dad0", "tonalRamp": ["#20231f", "#3a3f37", "#575d52", "#7b8275", "#a0a698", "#c6cabf", "#d7dad0", "#eceee4"] },
+      "wall-deep": { "role": "neutral", "displayName": "Concreto Hondo", "canonical": "#c6cabf", "tonalRamp": ["#1e211c", "#383d34", "#555b4f", "#787f70", "#9da396", "#b2b7aa", "#c6cabf", "#dde0d6"] },
+      "ink": { "role": "neutral", "displayName": "Tinta de Acero", "canonical": "#20272c", "tonalRamp": ["#0b0e10", "#20272c", "#3a444b", "#59656d", "#7d8991", "#a2acb2", "#c8ced2", "#e6e9eb"] },
+      "ink-soft": { "role": "neutral", "displayName": "Tinta Suave", "canonical": "#3a444b", "tonalRamp": ["#14181b", "#262d32", "#3a444b", "#52606a", "#718089", "#94a0a7", "#bac2c7", "#dde1e4"] },
+      "pipe-yellow": { "role": "primary", "displayName": "Amarillo de Tubería", "canonical": "#e3b01a", "tonalRamp": ["#3d2f00", "#6e5000", "#8f6a00", "#b98a07", "#e3b01a", "#f6d25a", "#fae392", "#fdf3cf"] },
+      "pipe-yellow-deep": { "role": "primary", "displayName": "Amarillo Oxidado", "canonical": "#a87d06", "tonalRamp": ["#2e2300", "#4d3a00", "#6e5000", "#8f6a00", "#a87d06", "#c89a1a", "#e3b94f", "#f3da98"] },
+      "valve-red": { "role": "secondary", "displayName": "Rojo de Volante", "canonical": "#a3231a", "tonalRamp": ["#2d0905", "#4f120d", "#731a13", "#a3231a", "#c4463c", "#d9726a", "#ea9d97", "#f6cdc9"] },
+      "lamp-green": { "role": "tertiary", "displayName": "Verde de Lámpara", "canonical": "#4f7d32", "tonalRamp": ["#13200b", "#233a15", "#37561f", "#4f7d32", "#6b9a4b", "#8db672", "#b3d09f", "#d9e8cf"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display (Anton)", "purpose": "Título de contacto y nombre del héroe." },
+      "headline": { "displayName": "Headline (Anton)", "purpose": "Títulos de sección y enlaces de contacto." },
+      "title": { "displayName": "Title (Anton)", "purpose": "Empresa por etapa y etiquetas de brida." },
+      "body": { "displayName": "Body (Barlow)", "purpose": "Prosa y viñetas, máx. 62ch." },
+      "label": { "displayName": "Label (Barlow Condensed)", "purpose": "Placas de datos: leyendas, términos, lugar, idiomas, pie." }
+    },
+    "shadows": [
+      { "name": "instrument", "value": "drop-shadow(0 4px 5px rgba(0,0,0,0.3))", "purpose": "Manómetros del héroe." },
+      { "name": "lamp", "value": "0 3px 6px rgba(0,0,0,0.35)", "purpose": "Lámparas de estado." },
+      { "name": "scene-pipe-shadow", "value": "ShadowMaterial #1b1a12 al 30%", "purpose": "Sombra de la tubería sobre el muro, dentro de la escena three.js." }
+    ],
+    "motion": [
+      { "name": "ease", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Único easing: revelaciones, fundido del lienzo, hover de enlaces." },
+      { "name": "reveal-plate", "value": "clip-path inset(0 100% 0 0) a inset(0)", "purpose": "Títulos de sección." },
+      { "name": "reveal-stage", "value": "opacity 0 a 1 con translate3d(0,36px,0) a none", "purpose": "Bloques de contenido." },
+      { "name": "gl-fade", "value": "opacity 0.9s", "purpose": "Entrada del lienzo y salida de la tubería CSS." },
+      { "name": "gauge-sway", "value": "6s ease-in-out infinite alternate, -38deg a 14deg", "purpose": "Manómetro Carga. Desactivado con reduced-motion." },
+      { "name": "lamp-blink", "value": "2.4s steps(1,end) infinite", "purpose": "Lámpara ámbar. Desactivado con reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "720px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Enlace de válvula",
+      "kind": "custom",
+      "refersTo": "link-valve",
+      "description": "Enlace de contacto en Anton con relleno amarillo que sube en hover y foco.",
+      "html": "<a class=\"ds-valve\" href=\"#\">LinkedIn</a>",
+      "css": ".ds-valve { font: 400 48px/1.04 Anton, 'Arial Narrow', sans-serif; text-transform: uppercase; text-decoration: none; color: #20272c; box-shadow: inset 0 -0.14em 0 #e3b01a; transition: box-shadow 0.35s cubic-bezier(0.16,1,0.3,1), color 0.35s cubic-bezier(0.16,1,0.3,1); } .ds-valve:hover, .ds-valve:focus-visible { box-shadow: inset 0 -1.1em 0 #e3b01a; } .ds-valve:focus-visible { outline: 3px solid #a3231a; outline-offset: 3px; }"
+    },
+    {
+      "name": "Cabecera de etapa",
+      "kind": "card",
+      "refersTo": "stage-tag",
+      "description": "Empresa, cargo en rojo, metadatos y etiqueta de año unida a la tubería por una línea de 3px.",
+      "html": "<div class=\"ds-stage\"><div><h3 class=\"ds-company\">Nexus Patio Tech</h3><p class=\"ds-role\">AI Software Engineer</p><p class=\"ds-meta\">Abr – Sep 2026 · Santa Cruz, Bolivia</p></div><span class=\"ds-tag\">2026</span></div>",
+      "css": ".ds-stage { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 16px; } .ds-company { margin: 0; font: 400 40px/1 Anton, 'Arial Narrow', sans-serif; text-transform: uppercase; color: #20272c; } .ds-role { margin: 8px 0 0; font: 600 20px/1.2 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: #a3231a; } .ds-meta { margin: 4px 0 0; font: 16px Barlow, Arial, sans-serif; color: #3a444b; } .ds-tag { position: relative; font: 400 30px/1 Anton, 'Arial Narrow', sans-serif; letter-spacing: 0.04em; text-transform: uppercase; margin-right: 40px; } .ds-tag::after { content: ''; position: absolute; left: calc(100% + 10px); top: 50%; width: 30px; height: 3px; margin-top: -1.5px; background: #20272c; }"
+    },
+    {
+      "name": "Cadena de voz",
+      "kind": "custom",
+      "refersTo": "stage-tag",
+      "description": "Frase, guía punteada y etiqueta de brida.",
+      "html": "<div class=\"ds-chain\"><p>Pasa la voz a texto.</p><span class=\"ds-guide\"></span><span class=\"ds-chain-tag\">STT</span></div>",
+      "css": ".ds-chain { display: flex; align-items: center; gap: 18px; } .ds-chain p { margin: 0; max-width: 40ch; font: 500 22px/1.35 Barlow, Arial, sans-serif; color: #20272c; } .ds-guide { flex: 1 1 24px; border-top: 3px dotted #3a444b; opacity: 0.6; } .ds-chain-tag { font: 400 30px/1 Anton, 'Arial Narrow', sans-serif; letter-spacing: 0.04em; text-transform: uppercase; color: #20272c; }"
+    },
+    {
+      "name": "Ficha de herramientas",
+      "kind": "custom",
+      "refersTo": "body",
+      "description": "Término en etiqueta condensada bajo un filete de 3px; herramientas como piezas indivisibles.",
+      "html": "<dl class=\"ds-fit\"><dt>Backend</dt><dd><span>Laravel</span><span>NestJS</span><span>Django</span></dd></dl>",
+      "css": ".ds-fit { margin: 0; padding: 16px 0 22px; border-top: 3px solid #20272c; } .ds-fit dt { font: 600 14px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: 0.16em; text-transform: uppercase; color: #3a444b; } .ds-fit dd { margin: 8px 0 0; font: 500 17px/1.55 Barlow, Arial, sans-serif; color: #20272c; } .ds-fit dd span { display: inline-block; white-space: nowrap; } .ds-fit dd span:not(:last-child)::after { content: '·'; margin: 0 0.45em 0 0.4em; }"
+    },
+    {
+      "name": "Manómetro",
+      "kind": "custom",
+      "refersTo": "gauge",
+      "description": "Instrumento del héroe con aguja roja; la aguja responde al scroll o oscila.",
+      "html": "<figure class=\"ds-gauge\"><svg viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"50\" r=\"48\" fill=\"#2b3338\"/><circle cx=\"50\" cy=\"50\" r=\"41\" fill=\"#eceee4\"/><line x1=\"50\" y1=\"54\" x2=\"50\" y2=\"17\" stroke=\"#a3231a\" stroke-width=\"3.4\" stroke-linecap=\"round\" transform=\"rotate(-24 50 50)\"/><circle cx=\"50\" cy=\"50\" r=\"5\" fill=\"#20272c\"/></svg><figcaption>Señal</figcaption></figure>",
+      "css": ".ds-gauge { margin: 0; width: 110px; text-align: center; } .ds-gauge svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.3)); } .ds-gauge figcaption { margin-top: 6px; font: 600 12px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: #3a444b; }"
+    },
+    {
+      "name": "Lámpara de estado",
+      "kind": "chip",
+      "refersTo": "lamp-amber",
+      "description": "Círculo con aro oscuro y brillo especular; la ámbar parpadea a pasos.",
+      "html": "<span class=\"ds-lamp\"></span>",
+      "css": ".ds-lamp { display: inline-block; width: 30px; aspect-ratio: 1; border-radius: 50%; border: 3px solid #1b2125; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.55) 0 12%, transparent 32%), #e7b41c; box-shadow: 0 3px 6px rgba(0,0,0,0.35); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "El Colector de Planta",
+    "overview": "La escena es una sala de máquinas bajo un tubo fluorescente: un muro de concreto gris claro con juntas de panel y agujeros de tensor, y una tubería industrial amarilla que lo cruza. La tubería es el hilo del documento: horizontal en el héroe, codo hacia abajo y columna a la derecha del contenido; en el contacto sale una derivación. Cada etapa del recorrido se rotula con una pieza, una brida con su etiqueta.\n\nColor restringido con acento rojo: concreto y tinta llevan la página, el amarillo pertenece a la tubería, el rojo se reserva para lo que se acciona o se señala. No hay rasters: la materia es una escena three.js y, si WebGL falla, la misma tubería pintada en CSS.\n\nDenso, sobrio y mecánico: tipografía condensada en mayúsculas, instrumentos como firma del héroe, movimiento solo cuando responde al scroll o indica estado.",
+    "keyCharacteristics": [
+      "Muro de concreto fijo, tubería amarilla que lleva la lectura, rojo solo para lo accionable o señalado.",
+      "Display en Anton mayúsculas, etiquetas en Barlow Condensed con tracking ancho, cuerpo en Barlow.",
+      "Cero rasters: la materia es three.js más CSS; la tubería CSS es la imagen de reserva y de carga.",
+      "Contenido en una columna izquierda con la espina de tubería a la derecha; una sola columna en móvil.",
+      "Revelaciones con dos gestos y un solo easing; reduced-motion apaga lo ornamental."
+    ],
+    "rules": [
+      { "name": "La Regla del Volante", "body": "El rojo marca lo que se acciona o se señala. Cualquier superficie nueva que lo use como decoración lo gasta.", "section": "colors" },
+      { "name": "La Regla de la Tubería", "body": "El amarillo brillante es pintura de tubería. En superficies pequeñas sobre el muro se usa el amarillo oxidado.", "section": "colors" },
+      { "name": "La Regla de la Placa", "body": "Anton solo para rotular (nombres, secciones, etiquetas de brida); todo lo que se lee de corrido va en Barlow.", "section": "typography" },
+      { "name": "La Regla del Muro Plano", "body": "El DOM no lleva sombras de interfaz; la única sombra que proyecta es la de la tubería en la escena y la de los instrumentos reales.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do mantener el muro #d7dad0 con tinta #20272c; el contraste del texto es la base de la legibilidad.",
+      "Do reservar el rojo #a3231a para lo accionable y señalado (volante, foco, cargo, A PERSONA, agujas).",
+      "Do rotular en Anton mayúsculas y leer en Barlow; etiquetas pequeñas en Barlow Condensed con tracking 0.14 a 0.16em.",
+      "Do usar un solo easing, cubic-bezier(0.16, 1, 0.3, 1), y dos gestos de revelación: plate (clip-path de izquierda a derecha, para títulos) y stage (fundido más 36px de subida, para bloques).",
+      "Do acotar el movimiento a la clase html.fx; con reduced-motion se apagan la oscilación del manómetro y el parpadeo de la lámpara y la transición del lienzo.",
+      "Do mantener la tubería CSS como imagen de reserva y de carga; el lienzo entra con fundido de 0.9s (html[data-gl=\"on\"])."
+    ],
+    "donts": [
+      "Don't introducir rasters o ilustraciones: la materia se construye con three.js y CSS.",
+      "Don't usar tarjetas, sombras de interfaz o esquinas redondeadas en el DOM.",
+      "Don't poner amarillo brillante como relleno de pequeñas superficies sobre el muro; usa el oxidado.",
+      "Don't usar rojo como decoración ni mezclarlo con amarillo en el mismo elemento.",
+      "Don't dejar que un texto largo use Anton o Barlow Condensed."
+    ]
+  }
+}

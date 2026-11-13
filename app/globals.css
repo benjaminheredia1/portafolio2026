@@ -1,26 +1,631 @@
 @import "tailwindcss";
 
+/*
+  Colector de planta. Concreto gris, tubería amarilla, volante rojo.
+  Escena: sala de máquinas con tubo fluorescente; la tubería cruza el muro.
+*/
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --wall: #d7dad0;
+  --wall-deep: #c6cabf;
+  --ink: #20272c;
+  --ink-soft: #3a444b;
+  --yellow: #e3b01a;
+  --yellow-deep: #a87d06;
+  --red: #a3231a;
+  --green: #4f7d32;
+
+  --pipe: 160px;
+  --gutter: clamp(16px, 3.9vw, 56px);
+  --gap: clamp(14px, 3vw, 56px);
+  --spine-col: calc(var(--gutter) + var(--pipe) * 1.45 + var(--gap));
+
+  --pipe-paint: linear-gradient(
+    180deg,
+    #8f6a00 0%,
+    #e7b41c 28%,
+    #f6d25a 46%,
+    #e7b41c 64%,
+    #b98a07 84%,
+    #6e5000 100%
+  );
+  --pipe-paint-v: linear-gradient(
+    90deg,
+    #8f6a00 0%,
+    #e7b41c 28%,
+    #f6d25a 46%,
+    #e7b41c 64%,
+    #b98a07 84%,
+    #6e5000 100%
+  );
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --font-display-stack: var(--font-display), "Arial Narrow", sans-serif;
+  --font-label-stack: var(--font-label), "Arial Narrow", sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@media (max-width: 720px) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --pipe: 44px;
+    --gutter: 16px;
+    --gap: 12px;
   }
 }
 
+html {
+  background: var(--wall);
+  scrollbar-width: thin;
+  scrollbar-color: var(--yellow-deep) var(--wall-deep);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background-color: var(--wall);
+  /* Paneles de concreto: agujero de tensor al centro de cada paño, juntas y grano. */
+  background-image:
+    radial-gradient(circle at 180px 150px, rgba(32, 39, 44, 0.13) 0 2px, transparent 3px),
+    linear-gradient(90deg, rgba(32, 39, 44, 0.09) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(32, 39, 44, 0.09) 1px, transparent 1px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .13 0 0 0 0 .15 0 0 0 0 .17 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 360px 300px, 360px 300px, 360px 300px, 240px 240px;
+  color: var(--ink);
+  font-family: var(--font-body), Arial, sans-serif;
+  font-size: clamp(17px, 1.3vw, 19px);
+  line-height: 1.55;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 3px;
+}
+
+/* ── Lienzo y página ─────────────────────────────────────────────────── */
+
+.scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.9s var(--ease);
+}
+html[data-gl="on"] .scene {
+  opacity: 1;
+}
+
+.page {
+  position: relative;
+  z-index: 1;
+}
+
+/*
+  Tubería pintada en CSS: es la primera imagen mientras carga three.js, y la
+  definitiva si WebGL falla (sin JS, contexto perdido). Se desvanece cuando
+  entra el lienzo.
+*/
+.hero-pipe::before,
+.hero-pipe::after,
+.spine {
+  transition: opacity 0.9s var(--ease);
+}
+.hero-pipe::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(var(--gutter) + var(--pipe) * 0.3) 0 0;
+  background: var(--pipe-paint);
+  border-top-right-radius: var(--pipe);
+}
+.hero-pipe::after {
+  content: "";
+  position: absolute;
+  right: calc(var(--gutter) + var(--pipe) * 0.3);
+  width: var(--pipe);
+  top: 50%;
+  height: 100svh;
+  background: var(--pipe-paint-v);
+}
+.spine {
+  position: absolute;
+  top: max(100svh, 640px);
+  bottom: calc(var(--pipe) * 1.1);
+  right: calc(var(--gutter) + var(--pipe) * 0.3);
+  width: var(--pipe);
+  pointer-events: none;
+  background: var(--pipe-paint-v);
+}
+/* La derivación "A persona" también queda pintada, hasta la columna. */
+.branch-run {
+  position: relative;
+}
+.branch-run::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: calc(var(--pipe) * -0.65 - var(--gap));
+  background: var(--pipe-paint);
+  transition: opacity 0.9s var(--ease);
+}
+html[data-gl="on"] .hero-pipe::before,
+html[data-gl="on"] .hero-pipe::after,
+html[data-gl="on"] .spine,
+html[data-gl="on"] .branch-run::before {
+  opacity: 0;
+}
+
+/* ── Héroe ───────────────────────────────────────────────────────────── */
+
+.hero {
+  min-height: max(100svh, 640px);
+  padding: 24px var(--gutter) clamp(20px, 3vw, 40px);
+  display: flex;
+  flex-direction: column;
+}
+
+.instruments {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(10px, 1.8vw, 26px);
+}
+
+.gauge {
+  margin: 0;
+  width: clamp(72px, 8.6vw, 124px);
+  text-align: center;
+}
+.gauge svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.3));
+}
+.g-glare {
+  fill: #fff;
+  opacity: 0.28;
+}
+.gauge figcaption {
+  margin-top: 6px;
+  font: 600 12px/1 var(--font-label-stack);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.g-rim {
+  fill: #2b3338;
+}
+.g-face {
+  fill: #eceee4;
+}
+.g-tick {
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: butt;
+}
+.g-tick.major {
+  stroke-width: 3.2;
+}
+.g-needle-line {
+  stroke: var(--red);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+}
+.g-hub {
+  fill: var(--ink);
+}
+.needle {
+  transform-box: view-box;
+  transform-origin: 50px 50px;
+  transform: rotate(calc(-120deg + var(--val, 0) * 240deg));
+}
+.g-signal {
+  --val: var(--v, 0);
+}
+.g-run {
+  --val: var(--p, 0);
+}
+.g-load .needle {
+  transform: rotate(-24deg);
+  animation: sway 6s ease-in-out infinite alternate;
+}
+@keyframes sway {
+  from {
+    transform: rotate(-38deg);
+  }
+  to {
+    transform: rotate(14deg);
+  }
+}
+
+.lamps {
+  display: flex;
+  gap: 10px;
+  align-self: center;
+  margin-left: clamp(12px, 3vw, 48px);
+}
+.lamp {
+  width: clamp(20px, 2.2vw, 30px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid #1b2125;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.55) 0 12%, transparent 32%),
+    var(--c);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+}
+.lamp.green {
+  --c: #5f8a3a;
+}
+.lamp.amber {
+  --c: #e7b41c;
+  animation: blink 2.4s steps(1, end) infinite;
+}
+@keyframes blink {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  61%,
+  100% {
+    opacity: 0.35;
+  }
+}
+
+.hero-pipe {
+  position: relative;
+  height: var(--pipe);
+  margin: auto calc(var(--gutter) * -1);
+}
+.hero h1 {
+  position: absolute;
+  left: var(--gutter);
+  top: 50%;
+  margin: 0;
+  transform: translateY(-48%);
+  font: 400 min(10.2vw, 156px) / 0.9 var(--font-display-stack);
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  word-spacing: 0.16em;
+  color: var(--ink);
+}
+.hero h1 span {
+  display: inline;
+}
+@media (max-width: 720px) {
+  .hero h1 {
+    top: auto;
+    bottom: calc(100% + 16px);
+    transform: none;
+    font-size: min(21vw, 110px);
+    line-height: 0.9;
+    white-space: normal;
+  }
+  .hero h1 span {
+    display: block;
+  }
+}
+
+.hero-foot {
+  display: grid;
+  gap: 6px;
+  padding-right: calc(var(--pipe) * 1.5 + var(--gap));
+}
+.place span {
+  display: inline;
+}
+@media (max-width: 720px) {
+  .place span {
+    display: block;
+  }
+  .place .sep {
+    display: none;
+  }
+  .hero-foot .role {
+    font-size: 20px;
+    letter-spacing: 0.08em;
+  }
+}
+.role {
+  margin: 0;
+  font: 600 clamp(22px, 3.2vw, 46px) / 1.05 var(--font-label-stack);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.place {
+  margin: 0;
+  font: 600 clamp(14px, 1.3vw, 18px) / 1.3 var(--font-label-stack);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* ── Línea: contenido a la izquierda, tubería a la derecha ──────────── */
+
+.line {
+  position: relative;
+  padding: 0 var(--spine-col) 0 var(--gutter);
+}
+.line > section {
+  padding-top: clamp(64px, 9vw, 140px);
+}
+
+h2.big {
+  margin: 0;
+  font: 400 clamp(40px, 6.2vw, 92px) / 0.95 var(--font-display-stack);
+  text-transform: uppercase;
+  text-wrap: balance;
+  max-width: 17ch;
+}
+
+.prose {
+  margin-top: clamp(24px, 3vw, 40px);
+  display: grid;
+  gap: 1em;
+}
+.prose p {
+  margin: 0;
+  max-width: 62ch;
+}
+
+.fittings {
+  margin: clamp(36px, 5vw, 64px) 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 clamp(24px, 4vw, 64px);
+}
+.fittings > div {
+  padding: 16px 0 22px;
+  border-top: 3px solid var(--ink);
+}
+.fittings dt {
+  font: 600 14px/1 var(--font-label-stack);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.fittings dd {
+  margin: 8px 0 0;
+  font-weight: 500;
+}
+/* Cada herramienta es una pieza: no se parte a media palabra ni deja el separador huérfano. */
+.fittings dd span {
+  display: inline-block;
+  white-space: nowrap;
+}
+.fittings dd span:not(:last-child)::after {
+  content: "·";
+  margin: 0 0.45em 0 0.4em;
+}
+@media (max-width: 720px) {
+  .fittings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Etapas */
+
+.stage {
+  margin-top: clamp(48px, 7vw, 104px);
+  min-height: calc(var(--pipe) * 1.3 + 40px);
+}
+.stage-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+}
+.company {
+  margin: 0;
+  font: 400 clamp(30px, 4.2vw, 60px) / 1 var(--font-display-stack);
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.role-line {
+  margin: 8px 0 0;
+  font: 600 clamp(18px, 1.7vw, 24px) / 1.2 var(--font-label-stack);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+.meta {
+  margin: 4px 0 0;
+  font-size: 16px;
+  color: var(--ink-soft);
+}
+
+.tag {
+  position: relative;
+  font: 400 clamp(26px, 2.8vw, 40px) / 1 var(--font-display-stack);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tag::after {
+  content: "";
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  width: calc(var(--gap) - 10px);
+  height: 3px;
+  margin-top: -1.5px;
+  background: var(--ink);
+}
+@media (max-width: 720px) {
+  .tag::after {
+    left: calc(100% + 4px);
+    width: calc(var(--gap) - 4px);
+  }
+}
+
+.points {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  max-width: 62ch;
+  display: grid;
+  gap: 12px;
+}
+.points li {
+  position: relative;
+  padding-left: 22px;
+}
+.points li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 8px;
+  height: 8px;
+  background: var(--yellow-deep);
+}
+
+.chain {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+}
+/* Texto, línea de guía y etiqueta: la guía une cada frase con su brida. */
+.chain li {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: calc(var(--pipe) * 1.3 + 16px);
+}
+.chain p {
+  order: 1;
+  flex: 0 1 auto;
+  margin: 0;
+  max-width: 40ch;
+  font-size: clamp(19px, 1.75vw, 25px);
+  line-height: 1.35;
+  font-weight: 500;
+}
+.chain li::after {
+  content: "";
+  order: 2;
+  flex: 1 1 24px;
+  border-top: 3px dotted var(--ink-soft);
+  opacity: 0.6;
+}
+.chain .tag {
+  order: 3;
+}
+
+/* Encargos */
+
+.jobs {
+  margin: 48px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 28px;
+  max-width: 62ch;
+}
+.jobs h3 {
+  margin: 0;
+  font: 400 clamp(26px, 2.6vw, 36px) / 1.05 var(--font-display-stack);
+  text-transform: uppercase;
+}
+.jobs p {
+  margin: 6px 0 0;
+}
+
+/* Contacto: la derivación sale de la columna */
+
+.contacto {
+  padding-bottom: clamp(32px, 4vw, 56px);
+}
+.branch-run {
+  height: calc(var(--pipe) * 0.62);
+  margin: calc(var(--pipe) * 0.95) 0 calc(var(--pipe) * 0.5);
+}
+.contacto h2 {
+  margin: 0;
+  font: 400 clamp(56px, 10vw, 150px) / 0.9 var(--font-display-stack);
+  text-transform: uppercase;
+  color: var(--red);
+}
+.contacto .lead {
+  margin: clamp(20px, 2.5vw, 32px) 0 0;
+  max-width: 52ch;
+}
+.reach {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.reach a {
+  font: 400 clamp(34px, 5vw, 72px) / 1.04 var(--font-display-stack);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  box-shadow: inset 0 -0.14em 0 var(--yellow);
+  transition: box-shadow 0.35s var(--ease), color 0.35s var(--ease);
+}
+.reach a:hover,
+.reach a:focus-visible {
+  box-shadow: inset 0 -1.1em 0 var(--yellow);
+}
+.langs {
+  margin: 36px 0 0;
+  font: 600 15px/1.4 var(--font-label-stack);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.foot {
+  margin: 0;
+  padding: 48px 0 40px;
+  font: 600 14px/1.4 var(--font-label-stack);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* ── Revelaciones (AOS): dos gestos propios, un solo easing ──────────── */
+
+body [data-aos] {
+  transition-timing-function: var(--ease) !important;
+}
+html.fx [data-aos="plate"] {
+  clip-path: inset(0 100% 0 0);
+  transition-property: clip-path;
+}
+html.fx [data-aos="plate"].aos-animate {
+  clip-path: inset(0 0 0 0);
+}
+html.fx [data-aos="stage"] {
+  opacity: 0;
+  transform: translate3d(0, 36px, 0);
+  transition-property: opacity, transform;
+}
+html.fx [data-aos="stage"].aos-animate {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lamp.amber,
+  .g-load .needle {
+    animation: none;
+  }
+  .scene {
+    transition: none;
+  }
 }
